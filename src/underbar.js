@@ -36,6 +36,18 @@ var _ = { };
   // Note: _.each does not have a return value, but rather simply runs the
   // iterator function over each item in the input collection.
   _.each = function(collection, iterator) {
+  	if(Array.isArray(collection)) {
+  		for(var i = 0; i < collection.length; i++) {
+	  		var value = collection[i];
+	  		var key = i;
+	  		iterator(value, key, collection);
+	  	}
+	} else {
+		for(var key in collection) {
+	  		var value = collection[key];
+		  		iterator(value, key, collection);
+		}
+  	}
   };
 
   // Returns the index at which value can be found in the array, or -1 if value
@@ -57,16 +69,53 @@ var _ = { };
 
   // Return all elements of an array that pass a truth test.
   _.filter = function(collection, test) {
+  	var filteredArray = [];
+  	_.each(collection, function(value, key, collection) {
+  		if (test(value)) {
+  			filteredArray.push(value);
+  		}
+  	});
+  	return filteredArray;
   };
 
   // Return all elements of an array that don't pass a truth test.
   _.reject = function(collection, test) {
     // TIP: see if you can re-use _.filter() here, without simply
     // copying code in and modifying it
+
+    // this is pretty ugly, i wanted to implement something like !test
+
+    // 1. build filtered array
+    var filteredArray = _.filter(collection, test);
+    var rejectedArray = [];
+
+    // 2. check if something from collection is in the filtered array
+    _.each(collection, function(value1, key1, collection1) {
+    	var itShouldBeRejected = true;
+    	_.each(filteredArray, function(value2, key2, collection2) {
+    		if (value1 === value2) {
+    			itShouldBeRejected = false;
+    		}
+    	});
+    	// 3. if it's not, it should be put into the rejected array
+    	if (itShouldBeRejected) {
+    		rejectedArray.push(value1);
+    	}
+    });
+    return rejectedArray;
   };
 
   // Produce a duplicate-free version of the array.
   _.uniq = function(array) {
+  	var results = array.slice(0);
+  	_.each(results, function(value, key, collection) {
+  		for(var i = key + 1; i < results.length; i++) {
+  			if (results[i] === value) {
+  				results.splice(i,1);
+  			}
+  		}
+  	});
+  	return results;
   };
 
 
