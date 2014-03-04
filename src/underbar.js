@@ -8,6 +8,7 @@ var _ = { };
   // seem very useful, but remember it--if a function needs to provide an
   // iterator when the user does not pass one in, this will be handy.
   _.identity = function(val) {
+    return val;
   };
 
   /**
@@ -28,6 +29,11 @@ var _ = { };
   // Like first, but for the last elements. If n is undefined, return just the
   // last element.
   _.last = function(array, n) {
+    var lastIndex = array.length - 1;
+    if (n > array.length) {
+      return array;
+    }
+    return n === undefined ? array[lastIndex] : array.slice(array.length - n, array.lastIndex)
   };
 
   // Call iterator(value, key, collection) for each element of collection.
@@ -191,9 +197,12 @@ var _ = { };
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
+    if (arguments.length === 1) {
+      iterator = _.identity;
+    }
     return _.reduce(collection, function(previousValue, item) {
-    	if (previousValue === true) {
-    		return iterator(item);
+    	if (previousValue) {
+    		return !!iterator(item);
     	} else {
     		return false;
     	}
