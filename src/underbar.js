@@ -121,9 +121,14 @@ var _ = { };
 
   // Return the results of applying an iterator to each element.
   _.map = function(array, iterator) {
+  	var results = [];
+  	_.each(array, function(value, key, collection) {
+  		results.push(iterator(value));
+  	});
     // map() is a useful primitive iteration function that works a lot
     // like each(), but in addition to running the operation on all
     // the members, it also maintains an array of results.
+    return results;
   };
 
   /*
@@ -163,6 +168,11 @@ var _ = { };
   //     return total + number;
   //   }, 0); // should be 6
   _.reduce = function(collection, iterator, accumulator) {
+  	var previousValue = accumulator;
+  	_.each(collection, function(value, key, collection) {
+  		previousValue = iterator(previousValue, value);
+  	});
+  	return previousValue;
   };
 
   // Determine if the array or object contains a given value (using `===`).
@@ -170,17 +180,24 @@ var _ = { };
     // TIP: Many iteration problems can be most easily expressed in
     // terms of reduce(). Here's a freebie to demonstrate!
     return _.reduce(collection, function(wasFound, item) {
-      if (wasFound) {
+      if (wasFound) { // 3. once set to true, iterator will return true for the rest of the time
         return true;
       }
-      return item === target;
-    }, false);
+      return item === target; // 2. once this is true, the next time iterator is run, wasFound is true
+    }, false); // 1. "accumulator starts as false"
   };
 
 
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
+    return _.reduce(collection, function(previousValue, item) {
+    	if (previousValue === true) {
+    		return iterator(item);
+    	} else {
+    		return false;
+    	}
+    }, true);
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
