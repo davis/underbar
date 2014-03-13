@@ -88,27 +88,9 @@ var _ = { };
   _.reject = function(collection, test) {
     // TIP: see if you can re-use _.filter() here, without simply
     // copying code in and modifying it
-
-    // this is pretty ugly, i wanted to implement something like !test
-
-    // 1. build filtered array
-    var filteredArray = _.filter(collection, test);
-    var rejectedArray = [];
-
-    // 2. check if something from collection is in the filtered array
-    _.each(collection, function(value1, key1, collection1) {
-    	var itShouldBeRejected = true;
-    	_.each(filteredArray, function(value2, key2, collection2) {
-    		if (value1 === value2) {
-    			itShouldBeRejected = false;
-    		}
-    	});
-    	// 3. if it's not, it should be put into the rejected array
-    	if (itShouldBeRejected) {
-    		rejectedArray.push(value1);
-    	}
+    return _.filter(collection, function(value) {
+    	return !test(value);
     });
-    return rejectedArray;
   };
 
   // Produce a duplicate-free version of the array.
@@ -222,6 +204,12 @@ var _ = { };
   // provided, provide a default one
   _.some = function(collection, iterator) {
     // TIP: There's a very clever way to re-use every() here.
+    if (arguments.length === 1) { //? how do i not put this in 2x?
+      iterator = _.identity;
+    }
+	return !_.every(collection, function(value) {
+		return !iterator(value);
+	});
   };
 
 
@@ -244,11 +232,27 @@ var _ = { };
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
+  	_.each(arguments, function(objects) {
+  		_.each(objects, function(value, key, collection) {
+  			obj[key] = value;
+  		});
+  	});
+  	return obj;
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
+  	// var args = Array.prototype.reverse.call(arguments);		//? why doesn't this work?
+  	// return _.extend.apply(obj, args)
+  	_.each(arguments, function(objects) {
+  		_.each(objects, function(value, key, collection) {
+  			if (obj[key] === undefined) {
+  				obj[key] = value;
+  			}
+  		});
+  	});
+  	return obj;
   };
 
 
@@ -290,6 +294,13 @@ var _ = { };
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+  	var memo = {};
+ 	return function() {
+ 		if (memo[arguments[0]] === undefined) {					//? why did i have to add [0]?
+ 			memo[arguments[0]] = func.apply(this, arguments);
+ 		}
+ 		return memo[arguments[0]];
+ 	}
   };
 
   // Delays a function for the given number of milliseconds, and then calls
